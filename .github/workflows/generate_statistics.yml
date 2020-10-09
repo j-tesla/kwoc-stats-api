@@ -24,7 +24,6 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install flake8 pytest
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
     
     - name: generate statistics
@@ -33,3 +32,18 @@ jobs:
         
       env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Git Auto Commit
+      uses: stefanzweifel/git-auto-commit-action@v4.5
+      with:
+        commit_message: Update statistics
+        commit_options: '--no-verify'
+        file_pattern: stats.json
+    
+    - name: "Run if changes have been detected"
+      if: steps.auto-commit-action.outputs.changes_detected == 'true'
+      run: echo "Changes!"
+
+    - name: "Run if no changes have been detected"
+      if: steps.auto-commit-action.outputs.changes_detected == 'false'
+      run: echo "No Changes!"
