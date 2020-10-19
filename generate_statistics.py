@@ -3,7 +3,7 @@ import csv
 import os
 import json
 import requests
-import sys 
+import sys
 import time
 
 # dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -14,8 +14,9 @@ import time
 """
 Taking in repo urls from ../projects.csv
 """
-projects = [] # includes array of MentorHandle/RepoName
-projects_meta_data = {} # includes array of objects, each containining 'mentor_original_name', 'Title'
+projects = []  # includes array of MentorHandle/RepoName
+# includes array of objects, each containining 'mentor_original_name', 'Title'
+projects_meta_data = {}
 ''' write its alternative for json'''
 # with open(PROJECT_CSV, 'r', encoding='utf-8') as project_file:
 #     raw_header = csv.reader(project_file)
@@ -26,22 +27,23 @@ projects_meta_data = {} # includes array of objects, each containining 'mentor_o
 #         repo_name = repo_splits[0] + '/' + repo_splits[1]
 #         projects.append(repo_name)
 #         print(repo_name)
-    # print(projects[0])
+# print(projects[0])
 
 with open('projects.json') as f:
     data = json.load(f)
     # print(data['projects'][0])
     for proj in data['projects']:
-        repo_name = proj['link'].replace("https://github.com/", "").replace("/issues", "")
+        repo_name = proj['link'].replace(
+            "https://github.com/", "").replace("/issues", "")
         repo_splits = repo_name.split('/')
         repo_name = repo_splits[0] + '/' + repo_splits[1]
         projects.append(repo_name)
-        projects_meta_data[repo_splits[1]] = { "mentor_name": proj['mentor'], 'title': proj['title'] }
-        
+        projects_meta_data[repo_splits[1]] = {
+            "mentor_name": proj['mentor'], 'title': proj['title']}
+
 # print(projects[0])
 
-# successful in generating the project names 
-
+# successful in generating the project names
 
 
 # token = open(root_dir + '/secrets/token.txt', 'r').read().split('\n')[0]
@@ -108,7 +110,8 @@ value : dict
 
 # Generate empty statistics
 usernames = set()
-with open("students_.csv", "r", encoding='utf-8') as csv_file:  # This csv is generated from the sanitized sheet
+# This csv is generated from the sanitized sheet
+with open("students_.csv", "r", encoding='utf-8') as csv_file:
     raw_reader = csv.reader(csv_file)
     header = next(raw_reader, None)
     for row in raw_reader:
@@ -141,7 +144,8 @@ def fetch_all_pages(query, params=None, headers=None):
     r = requests.get(query, params=params, headers=headers)
     # print(r)
     if not r.ok:
-        raise(Exception("Error in fetch_all_pages", "query : ", query, "r.json() ", r.json()))
+        raise(Exception("Error in fetch_all_pages",
+                        "query : ", query, "r.json() ", r.json()))
     link = r.headers.get('link', None)
     if link is None:
         return r.json()
@@ -177,6 +181,7 @@ def fetch_all_pull_requests(query, since=None, headers=None):
 
             return r.json() + fetch_all_pull_requests(next_url, since=since, headers=headers)
 
+
 start = time.time()
 project_table = {}
 for project in projects:
@@ -184,7 +189,7 @@ for project in projects:
         print("Working on project : ", project)
         mentor_name = project.split("/")[0]
         mentors_project = project.split("/")[1]
-        project_table[mentor_name] = { mentors_project : {} }
+        project_table[mentor_name] = {mentors_project: {}}
 
         # Mentor original name
         project_table[mentor_name]['mentor_name'] = projects_meta_data[mentors_project]['mentor_name']
@@ -200,7 +205,7 @@ for project in projects:
         }
 
         commits = fetch_all_pages(query, params=params, headers=headers)
-        
+
         for commit in commits:
             if commit['author'] is None:
                 continue
@@ -214,7 +219,8 @@ for project in projects:
                 _api_url_commit = commit['url']
                 r = requests.get(_api_url_commit, headers=headers)
                 if not r.ok:
-                    raise(Exception("Error in fetching commit info", "query : ", _api_url_commit, "r.json() ", r.json()))
+                    raise(Exception("Error in fetching commit info",
+                                    "query : ", _api_url_commit, "r.json() ", r.json()))
                 _commit_info = r.json()
 
                 try:
@@ -244,21 +250,25 @@ for project in projects:
                     'lines_removed': lines_removed,
                 }
                 if author in project_table[mentor_name][mentors_project]:
-                    project_table[mentor_name][mentors_project][author].append(commit_record)
+                    project_table[mentor_name][mentors_project][author].append(
+                        commit_record)
                 else:
-                    project_table[mentor_name][mentors_project][author] = [commit_record]
+                    project_table[mentor_name][mentors_project][author] = [
+                        commit_record]
 
                 stats[author]['commits'].append(commit_record)
                 stats[author]['projects'].add(project)
                 stats[author]['no_of_commits'] += 1
-                stats[author]['languages'] = stats[author]['languages'].union(languages_used)
+                stats[author]['languages'] = stats[author]['languages'].union(
+                    languages_used)
                 stats[author]['lines_added'] += lines_added
                 stats[author]['lines_removed'] += lines_removed
                 if stats[author]['avatar_url'] == '':
                     stats[author]['avatar_url'] = avatar_url
 
         # Students' data based on Pull Requests
-        query = "https://api.github.com/repos/{}/pulls?state=all".format(project)
+        query = "https://api.github.com/repos/{}/pulls?state=all".format(
+            project)
         prs = fetch_all_pull_requests(query, since=since, headers=headers)
 
         # Trim out of date pull requests
@@ -291,12 +301,11 @@ for project in projects:
     except Exception as e:
         print("failed for "+project)
         print(e)
-    
-    
+
 
 project_stats = {"stats": project_table}
 with open("mentor_stats.json", "w") as f:
     json.dump(project_stats, f)
 
 
-print('time taken ',time.time() - start)
+print('time taken ', time.time() - start)
