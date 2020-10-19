@@ -39,6 +39,9 @@ jobs:
         commit_message: Update statistics
         commit_options: '--no-verify'
         file_pattern: stats.json
+        commit_user_name: j-tesla
+        commit_user_email: 58279279+j-tesla@users.noreply.github.com
+        commit_author: Jayanth PSY <58279279+j-tesla@users.noreply.github.com>
     
     - name: "Run if changes have been detected"
       if: steps.auto-commit-action.outputs.changes_detected == 'true'
