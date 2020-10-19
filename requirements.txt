@@ -15,8 +15,8 @@ toml==0.10.1
 typed-ast==1.4.1
 Werkzeug==1.0.1
 wrapt==1.12.1
-black
-bandit
-flake8
-pre-commit
-requests
+black==20.8b1
+bandit==1.6.2
+flake8==3.8.4
+pre-commit==2.7.1
+requests==2.24.0
