@@ -11,7 +11,6 @@ import requests
 # root_dir = '/'.join(dir_path.split('/')[:-2])
 # PROJECT_CSV = os.path.join(root_dir,"gh_scraper/projects.csv")
 # GITLINK_INDEX = 4
-
 """
 Taking in repo urls from ../projects.csv
 """
@@ -34,9 +33,8 @@ with open("projects.json") as f:
     data = json.load(f)
     # print(data['projects'][0])
     for proj in data["projects"]:
-        repo_name = (
-            proj["link"].replace("https://github.com/", "").replace("/issues", "")
-        )
+        repo_name = (proj["link"].replace("https://github.com/",
+                                          "").replace("/issues", ""))
         repo_splits = repo_name.split("/")
         repo_name = repo_splits[0] + "/" + repo_splits[1]
         projects.append(repo_name)
@@ -48,7 +46,6 @@ with open("projects.json") as f:
 # print(projects[0])
 
 # successful in generating the project names
-
 
 # token = open(root_dir + '/secrets/token.txt', 'r').read().split('\n')[0]
 
@@ -134,8 +131,8 @@ with open("students_.csv", "r", encoding="utf-8") as csv_file:
         stats[user]["lines_removed"] = 0
         stats[user]["commits"] = list()
 
-
 # print(usernames)
+
 
 # Students' data based on commits merged
 def fetch_all_pages(query, params=None, headers=None):
@@ -146,11 +143,8 @@ def fetch_all_pages(query, params=None, headers=None):
     r = requests.get(query, params=params, headers=headers)
     # print(r)
     if not r.ok:
-        raise (
-            Exception(
-                "Error in fetch_all_pages", "query : ", query, "r.json() ", r.json()
-            )
-        )
+        raise (Exception("Error in fetch_all_pages", "query : ", query,
+                         "r.json() ", r.json()))
     link = r.headers.get("link", None)
     if link is None:
         return r.json()
@@ -163,7 +157,8 @@ def fetch_all_pages(query, params=None, headers=None):
             if 'rel="next"' in url:
                 next_url = url.split(";")[0][1:-1]
 
-        return r.json() + fetch_all_pages(next_url, params=params, headers=headers)
+        return r.json() + fetch_all_pages(
+            next_url, params=params, headers=headers)
 
 
 def fetch_all_pull_requests(query, since=None, headers=None):
@@ -185,8 +180,7 @@ def fetch_all_pull_requests(query, since=None, headers=None):
                     next_url = url.split(";")[0][1:-1]
 
             return r.json() + fetch_all_pull_requests(
-                next_url, since=since, headers=headers
-            )
+                next_url, since=since, headers=headers)
 
 
 start = time.time()
@@ -199,13 +193,11 @@ for project in projects:
         project_table[mentor_name] = {mentors_project: {}}
 
         # Mentor original name
-        project_table[mentor_name]["mentor_name"] = projects_meta_data[mentors_project][
-            "mentor_name"
-        ]
+        project_table[mentor_name]["mentor_name"] = projects_meta_data[
+            mentors_project]["mentor_name"]
         # adding title
-        project_table[mentor_name][mentors_project]["title"] = projects_meta_data[
-            mentors_project
-        ]["title"]
+        project_table[mentor_name][mentors_project][
+            "title"] = projects_meta_data[mentors_project]["title"]
 
         query = "https://api.github.com/repos/{}/commits".format(project)
         since = "2019-12-07T00:00:00Z"
@@ -227,15 +219,13 @@ for project in projects:
                 _api_url_commit = commit["url"]
                 r = requests.get(_api_url_commit, headers=headers)
                 if not r.ok:
-                    raise (
-                        Exception(
-                            "Error in fetching commit info",
-                            "query : ",
-                            _api_url_commit,
-                            "r.json() ",
-                            r.json(),
-                        )
-                    )
+                    raise (Exception(
+                        "Error in fetching commit info",
+                        "query : ",
+                        _api_url_commit,
+                        "r.json() ",
+                        r.json(),
+                    ))
                 _commit_info = r.json()
 
                 try:
@@ -266,8 +256,7 @@ for project in projects:
                 }
                 if author in project_table[mentor_name][mentors_project]:
                     project_table[mentor_name][mentors_project][author].append(
-                        commit_record
-                    )
+                        commit_record)
                 else:
                     project_table[mentor_name][mentors_project][author] = [
                         commit_record
@@ -277,15 +266,15 @@ for project in projects:
                 stats[author]["projects"].add(project)
                 stats[author]["no_of_commits"] += 1
                 stats[author]["languages"] = stats[author]["languages"].union(
-                    languages_used
-                )
+                    languages_used)
                 stats[author]["lines_added"] += lines_added
                 stats[author]["lines_removed"] += lines_removed
                 if stats[author]["avatar_url"] == "":
                     stats[author]["avatar_url"] = avatar_url
 
         # Students' data based on Pull Requests
-        query = "https://api.github.com/repos/{}/pulls?state=all".format(project)
+        query = "https://api.github.com/repos/{}/pulls?state=all".format(
+            project)
         prs = fetch_all_pull_requests(query, since=since, headers=headers)
 
         # Trim out of date pull requests
@@ -319,10 +308,8 @@ for project in projects:
         print("failed for " + project)
         print(e)
 
-
 project_stats = {"stats": project_table}
 with open("mentor_stats.json", "w") as f:
     json.dump(project_stats, f)
-
 
 print("time taken ", time.time() - start)
