@@ -1,10 +1,11 @@
 import copy
 import csv
-import os
 import json
-import requests
+import os
 import sys
 import time
+
+import requests
 
 # dir_path = os.path.dirname(os.path.realpath(__file__))
 # root_dir = '/'.join(dir_path.split('/')[:-2])
