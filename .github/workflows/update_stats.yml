@@ -4,9 +4,9 @@
 name: Update Stats
 
 on:
+  workflow_dispatch:
   schedule:
     - cron: '*/10 * * * *'
-  workflow_dispatch:
 
 jobs:
   build:
